@@ -1,0 +1,76 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Carrito {
+  id_usuario      Int               @id
+  Usuario         Usuario           @relation(fields: [id_usuario], references: [id_usuario])
+  CarritoProducto CarritoProducto[]
+}
+
+model CarritoProducto {
+  id_carrito  Int
+  id_producto Int
+  cantidad    Int      @default(1)
+  Carrito     Carrito  @relation(fields: [id_carrito], references: [id_usuario])
+  Producto    Producto @relation(fields: [id_producto], references: [id_producto])
+
+  @@id([id_carrito, id_producto])
+}
+
+model Categoria {
+  id_categoria Int        @id @default(autoincrement())
+  nombre       String
+  Producto     Producto[]
+}
+
+model DetallePedido {
+  id_detalle      Int      @id @default(autoincrement())
+  id_pedido       Int
+  id_producto     Int
+  cantidad        Int
+  precio_unitario Decimal
+  Pedido          Pedido   @relation(fields: [id_pedido], references: [id_pedido])
+  Producto        Producto @relation(fields: [id_producto], references: [id_producto])
+}
+
+model Pedido {
+  id_pedido     Int             @id @default(autoincrement())
+  id_usuario    Int
+  fecha_pedido  DateTime        @default(now())
+  estado        String          @default("Pendiente")
+  DetallePedido DetallePedido[]
+  Usuario       Usuario         @relation(fields: [id_usuario], references: [id_usuario])
+}
+
+model Producto {
+  id_producto     Int               @id @default(autoincrement())
+  nombre          String
+  precio          Decimal
+  descripcion     String?
+  stock           Int               @default(0)
+  id_categoria    Int
+  imagen_url      String?
+  CarritoProducto CarritoProducto[]
+  DetallePedido   DetallePedido[]
+  Categoria       Categoria         @relation(fields: [id_categoria], references: [id_categoria])
+}
+
+model Usuario {
+  id_usuario         Int      @id @default(autoincrement())
+  nombre             String
+  correo             String   @unique
+  password           String
+  fecha_creacion     DateTime @default(now())
+  compras_acumuladas Decimal  @default(0.00)
+  tipo_descuento     String   @default("Sin descuento")
+  descuento_usado    Boolean  @default(false)
+  umbral_descuento   Decimal  @default(1000.00)
+  Carrito            Carrito?
+  Pedido             Pedido[]
+}
