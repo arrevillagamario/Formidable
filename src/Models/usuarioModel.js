@@ -4,13 +4,14 @@ const prisma = new PrismaClient();
 
 // Registro de usuario
 export const registrarUsuario = async (data) => {
-  const { nombre, correo, password } = data;
+  const { nombre, correo, password, rol } = data;
 
   return await prisma.usuario.create({
     data: {
       nombre,
       correo,
       password,
+      rol,
     },
   });
 };
